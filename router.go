@@ -18,15 +18,23 @@ type Handler func(*Params) error
 
 // Router is a request router for any kind of workload, not specific for HTTP servers
 type Router struct {
-	methods map[string]*Tree
+	methods  map[string]*Tree
+	notFound Handler
 }
 
 // New returns a new router
-func New() *Router {
+func New(notFound Handler) *Router {
 
-	return &Router{
-		methods: make(map[string]*Tree),
+	var r Router = Router{
+		methods:  make(map[string]*Tree),
+		notFound: notFound,
 	}
+
+	if r.notFound == nil {
+		r.notFound = defaultNotFound
+	}
+
+	return &r
 
 }
 
@@ -34,9 +42,15 @@ func New() *Router {
 func (r *Router) Method(method string) *Tree {
 
 	if _, ok := r.methods[method]; !ok {
-		r.methods[method] = NewTree()
+		r.methods[method] = NewTree(method, r.notFound)
 	}
 
 	return r.methods[method]
+
+}
+
+func defaultNotFound(_ *Params) error {
+
+	return ErrNotFound
 
 }

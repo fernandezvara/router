@@ -9,13 +9,17 @@ const (
 )
 
 type Tree struct {
-	leaf *Leaf
+	leaf     *Leaf
+	method   string
+	notFound Handler
 }
 
 // NewTree creates a new trie tree.
-func NewTree() *Tree {
+func NewTree(method string, notFound Handler) *Tree {
 	return &Tree{
-		leaf: newLeaf(""),
+		leaf:     newLeaf(""),
+		method:   method,
+		notFound: notFound,
 	}
 }
 
@@ -115,23 +119,22 @@ func (t *Tree) Execute(path string) error {
 func (t *Tree) search(path string) (p *Params, h Handler, err error) {
 
 	var (
-		leaf      *Leaf = t.leaf
-		parts     []string
-		index     int
-		params    map[string]string = make(map[string]string)
-		retParams map[string]string
+		leaf   *Leaf = t.leaf
+		parts  []string
+		index  int
+		params map[string]string = make(map[string]string)
+		// retParams map[string]string
 	)
 
 	parts = strings.Split(path, pathDelimiter)
 
-	if retParams, h, err = t.subsearch(path, leaf, parts, index, params); err != nil {
-		return
+	params, h, err = t.subsearch(path, leaf, parts, index, params)
+
+	p = newParams(params, t.method, path)
+
+	if err == ErrNotFound {
+		err = t.notFound(p)
 	}
-
-	p = newParams(retParams, path)
-
-	// fmt.Println("retPArams:", retParams)
-	// fmt.Println("p:", p)
 
 	return
 

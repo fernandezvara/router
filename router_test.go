@@ -1,6 +1,7 @@
 package router
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -9,7 +10,7 @@ import (
 
 func TestRouter(t *testing.T) {
 
-	r := New().Method("TEST")
+	r := New(nil).Method("TEST")
 	assert.NotNil(t, r)
 
 	r.Insert("m/:a", func(_ *Params) error { print("m/:a"); return nil })
@@ -78,5 +79,39 @@ func TestRouter(t *testing.T) {
 
 	err = r.Execute("nonexistent")
 	assert.Equal(t, ErrNotFound, err)
+
+}
+
+func TestCustomNotFound(t *testing.T) {
+
+	var errCustom = errors.New("my custom error")
+
+	custom := func(p *Params) error {
+		// params are accesible here to help find potential missing routes, log, debug...
+		println(p.Method())
+		println(p.Path())
+		return errCustom
+	}
+
+	r := New(custom).Method("TEST")
+	assert.NotNil(t, r)
+
+	r.Insert("m/:a", func(_ *Params) error { print("m/:a"); return nil })
+	assert.Equal(t, r.leaf.Path, "")
+
+	params, _, e := r.search("m/test")
+	assert.NotNil(t, r)
+	assert.Nil(t, e)
+	assert.Equal(t, "test", params.Param("a"))
+	assert.Equal(t, "TEST", params.Method())
+	assert.Equal(t, "m/test", params.Path())
+
+	params, _, e = r.search("path/that/not/exists")
+	assert.Equal(t, errCustom, e)
+	assert.Equal(t, "TEST", params.Method())
+	assert.Equal(t, "path/that/not/exists", params.Path())
+
+	e = r.Execute("notexists")
+	assert.Equal(t, errCustom, e)
 
 }
