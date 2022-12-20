@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/fernandezvara/router"
@@ -9,7 +11,14 @@ import (
 
 func main() {
 
-	r := router.New(nil)
+	customNotFound := func(p *router.Params) error {
+		// monkeys working ...
+		//
+		log.Println("ERR", p.Method(), p.Path())
+		return errors.New("ouch")
+	}
+
+	r := router.New(customNotFound)
 
 	r.Method("TEST").Insert("hello", func(_ *router.Params) error {
 		fmt.Print("Hello!\n")
@@ -26,6 +35,8 @@ func main() {
 	t.Execute("hello/Antonio")
 	time.Sleep(2 * time.Second)
 	t.Execute("hello/Antonio/Fernandez")
+	time.Sleep(2 * time.Second)
+	fmt.Println(t.Execute("hey/John/Doe"))
 
 }
 

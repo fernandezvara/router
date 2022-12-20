@@ -22,7 +22,7 @@ import (
 
 func main() {
 
-	r := router.New()
+	r := router.New(nil)
 
 	r.Method("TEST").Insert("hello", func(_ *router.Params) error {
 		fmt.Print("Hello!\n")
