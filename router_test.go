@@ -16,7 +16,7 @@ func TestRouter(t *testing.T) {
 	r.Insert("m/:a", func(_ *Params) error { print("m/:a"); return nil })
 	assert.Equal(t, r.leaf.Path, "")
 
-	_, _, e := r.search("m/a")
+	_, _, e := r.Search("m/a")
 	assert.NotNil(t, r)
 	assert.Nil(t, e)
 
@@ -39,25 +39,25 @@ func TestRouter(t *testing.T) {
 	assert.Error(t, r.Insert("this contains spaces so is not valid", func(_ *Params) error { return nil }))
 	assert.Error(t, r.Insert("this,contains,commas,so,is,not,valid", func(_ *Params) error { return nil }))
 
-	_, _, e = r.search("items")
+	_, _, e = r.Search("items")
 	assert.Nil(t, e)
 
-	_, _, e = r.search("items/1")
+	_, _, e = r.Search("items/1")
 	assert.Nil(t, e)
 
-	_, _, e = r.search("items/1/subitems")
+	_, _, e = r.Search("items/1/subitems")
 	assert.Nil(t, e)
 
-	_, _, e = r.search("items/1/subitems/11")
+	_, _, e = r.Search("items/1/subitems/11")
 	assert.Nil(t, e)
 
-	_, _, e = r.search("items/1/sub")
+	_, _, e = r.Search("items/1/sub")
 	assert.Nil(t, e)
 
-	_, _, e = r.search("items/1/sub/11")
+	_, _, e = r.Search("items/1/sub/11")
 	assert.Nil(t, e)
 
-	_, _, e = r.search(("non-existent"))
+	_, _, e = r.Search(("non-existent"))
 	assert.Equal(t, ErrNotFound, e)
 
 	// test handler
@@ -99,14 +99,14 @@ func TestCustomNotFound(t *testing.T) {
 	r.Insert("m/:a", func(_ *Params) error { print("m/:a"); return nil })
 	assert.Equal(t, r.leaf.Path, "")
 
-	params, _, e := r.search("m/test")
+	params, _, e := r.Search("m/test")
 	assert.NotNil(t, r)
 	assert.Nil(t, e)
 	assert.Equal(t, "test", params.Param("a"))
 	assert.Equal(t, "TEST", params.Method())
 	assert.Equal(t, "m/test", params.Path())
 
-	params, _, e = r.search("path/that/not/exists")
+	params, _, e = r.Search("path/that/not/exists")
 	assert.Equal(t, errCustom, e)
 	assert.Equal(t, "TEST", params.Method())
 	assert.Equal(t, "path/that/not/exists", params.Path())
