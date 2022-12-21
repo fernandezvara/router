@@ -108,7 +108,7 @@ func (t *Tree) Execute(path string) error {
 		err error
 	)
 
-	if p, h, err = t.search(path); err != nil {
+	if p, h, err = t.Search(path); err != nil {
 		return err
 	}
 
@@ -116,7 +116,7 @@ func (t *Tree) Execute(path string) error {
 
 }
 
-func (t *Tree) search(path string) (p *Params, h Handler, err error) {
+func (t *Tree) Search(path string) (p *Params, h Handler, err error) {
 
 	var (
 		leaf   *Leaf = t.leaf
